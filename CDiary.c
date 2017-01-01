@@ -3,11 +3,13 @@
 #include<stdlib.h>
 #include<string.h>
 #include<windows.h>
+int main_menu();
+int Diary_options();
 void dairy(char *id);
-void lfunction();
+void login();
 void signup();
 void copycontents();
-void getdate();
+void date_converter();
 struct given
 {
     int gday;
@@ -21,17 +23,16 @@ struct present
     int pyear;
 }get;
 FILE *fp;
-char login[1000],name[30],ch,current[20];
+char username[1000],name[30],ch,current[20];
 int setday,setmonth,setyear;
 int main()
 {
     int option;
-    printf("\t\t\t\t1-->login\n\n\t\t\t\t2-->signup");
-    scanf("%d",&option);
+    option=main_menu();
     if(option==1)
     {
         system("cls");
-        lfunction();
+        login();
     }
     else
     {
@@ -40,7 +41,9 @@ int main()
     }
     return 0;
 }
-void lfunction()
+/* This function takes the user name and password checks whether the account is already exist or not, if exist then user can able to go for further
+or else Displays Your account does not exist"*/
+void login()
 {
     int i=1,j,repeat=1;
     char id[20];
@@ -65,15 +68,16 @@ void lfunction()
         }
         name[i]=',';
         name[i+1]='\0';
-        if(strstr(login,name)!=NULL&&strcmp(strstr(login,strstr(login,name)),strstr(login,name))==0)
+        if(strstr(username,name)!=NULL&&strcmp(strstr(username,strstr(username,name)),strstr(username,name))==0)
         {
             printf("\n\n\t\t\t\tYour account exist");
             printf("\n\n\t\t\t\tPRESS ENTER TO CONTINUE:");
             getch();
+            system("cls");
             printf("\n\n\t\t\t\tENTER THE DATE");
             scanf("%d%d%d",&read.gday,&read.gmonth,&read.gyear);
             system("cls");
-            getdate();
+            date_converter();
             dairy(id);
             repeat=0;
         }else
@@ -84,6 +88,7 @@ void lfunction()
         }
     }
 }
+/* This functions helps in creating the new account for the user if the account does not signed up */
 void signup()
 {
     int i,repeat=1,repeat1=1,j;
@@ -104,7 +109,7 @@ void signup()
         id1[j-1]='\0';
         i=0;
         copycontents();
-        if(strstr(login,id)!=NULL&&strcmp(strstr(login,strstr(login,id)),strstr(login,id))==0)
+        if(strstr(username,id)!=NULL&&strcmp(strstr(username,strstr(username,id)),strstr(username,id))==0)
         {
             printf("\n\n\t\t\t\tUser name already exist");
             getch();
@@ -152,12 +157,13 @@ void signup()
     fclose(fp);
     printf("\n\n\t\t\t\tPRESS ENTER TO CONTINUE:");
     getch();
+    system("cls");
     printf("\n\n\t\t\t\tENTER THE DATE");
     scanf("%d%d%d",&read.gday,&read.gmonth,&read.gyear);
-    getch();
-    getdate();
+    date_converter();
     dairy(id1);
 }
+/*This function copy the all the user names and the passwords of all signed in users into an string to compare already existing user names and passwords*/
 void copycontents()
 {
     int i=0;
@@ -165,58 +171,59 @@ void copycontents()
     do
     {
         ch=fgetc(fp);
-        login[i]=ch;
+        username[i]=ch;
         i++;
     }while(ch!=EOF);
-    login[i]='\0';
+    username[i]='\0';
     fclose(fp);
 }
-void getdate()
+/*This function get the integer type date given by user and converts it into char type*/
+void date_converter()
 {
-    SYSTEMTIME start;
-    GetSystemTime(&start);
     struct time
     {
         char day[20];
         char month[5];
         char year[10];
-    }d1;
+    }time_in_char;
     int r,i=0;
     setday=read.gday;
     while(read.gday!=0)
     {
         r=read.gday%10;
-        d1.day[i]=(char)(r+48);
+        time_in_char.day[i]=(char)(r+48);
         read.gday=read.gday/10;
         i++;
     }
-    d1.day[i]='\0';
-    strrev(d1.day);
+    time_in_char.day[i]='\0';
+    strrev(time_in_char.day);
     i=0;
     setmonth=read.gmonth;
     while(read.gmonth!=0)
     {
         r=read.gmonth%10;
-        d1.month[i]=(char)(r+48);
+        time_in_char.month[i]=(char)(r+48);
         read.gmonth=read.gmonth/10;
         i++;
     }
-    d1.month[i]='\0';
-    strrev(d1.month);
+    time_in_char.month[i]='\0';
+    strrev(time_in_char.month);
     i=0;
     setyear=read.gyear;
     while(read.gyear!=0)
     {
         r=read.gyear%10;
-        d1.year[i]=(char)(r+48);
+        time_in_char.year[i]=(char)(r+48);
         read.gyear=read.gyear/10;
         i++;
     }
-    d1.year[i]='\0';
-    strrev(d1.year);
-    strcat(d1.day,strcat(d1.month,d1.year));
-    strcpy(current,d1.day);
+    time_in_char.year[i]='\0';
+    strrev(time_in_char.year);
+    strcat(time_in_char.day,strcat(time_in_char.month,time_in_char.year));
+    strcpy(current,time_in_char.day);
 }
+/*This function creates a new file or open the existing file according to the given date and user name given by the user and perform the read and write
+operations*/
 void dairy(char *id)
 {
     char filename[30],temp[30];
@@ -225,41 +232,41 @@ void dairy(char *id)
     strcpy(filename,id);
     strcat(filename,".txt");
     int option,flag=1;
-    FILE *text;
+    FILE *textFile;
     SYSTEMTIME start;
     GetSystemTime(&start);
     get.pday=start.wDay;
     get.pmonth=start.wMonth;
     get.pyear=start.wYear;
-    if((setday<=get.pday&&setmonth<=get.pmonth&&setyear<=get.pyear))
+    if((setday<=get.pday&&setmonth<=get.pmonth&&setyear<=get.pyear)||(setmonth<get.pmonth&&setyear<get.pyear)||(setyear<get.pyear))
     {
-       option=menu();
+       option=Diary_options();
        if(option==1)
        {
            printf("\n\n\t\t\t\tEnter the text:\n\n\n\n");
-           text=fopen(filename,"r");
-           while((ch=fgetc(text))!=EOF)
+           textFile=fopen(filename,"r");
+           while((ch=fgetc(textFile))!=EOF)
             {
                 printf("%c",ch);
             }
-            fclose(text);
+            fclose(textFile);
             printf("\n\n-----------------------------------------------------------------------\n\n");
-           text=fopen(filename,"a");
+           textFile=fopen(filename,"a");
            while((ch=getche())!='\r')
            {
                fputc(ch,fp);
            }
-           fclose(text);
+           fclose(textFile);
        }
        else
        {
-           text=fopen(filename,"r");
-            while((ch=fgetc(text))!=EOF)
+           textFile=fopen(filename,"r");
+            while((ch=fgetc(textFile))!=EOF)
             {
                 printf("%c",ch);
                 flag=0;
             }
-            fclose(text);
+            fclose(textFile);
             if(flag)
             {
                 printf("\n\n\t\t\t\tThis page is Empty");
@@ -280,7 +287,9 @@ void dairy(char *id)
             printf("Entered date contents are not present");
     }
 }
-int menu()
+/*This function Displays the operations that can be performed for reading and writing the the text into the diary, reads the option
+and returns it*/
+int Diary_options()
 {
     int i;
     printf("\n\n\t\t\t\t1->To write text dairy");
@@ -289,5 +298,13 @@ int menu()
     system("cls");
     return(i);
 }
-
+/*This function Displays the login or signup option,reads the integer which indicates the certain option provided in the function
+and returns it*/
+int main_menu()
+{
+    int option;
+    printf("\t\t\t\t1-->login\n\n\t\t\t\t2-->signup");
+    scanf("%d",&option);
+    return(option);
+}
 
